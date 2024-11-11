@@ -1,0 +1,11 @@
+gsap.from("h1",{
+    opacity:0,
+    duration:1,
+    delay:2
+})
+gsap.from("h2",{
+    opacity:0,
+    duration:1,
+    delay:3,
+    stagger:0.5
+})
