@@ -11,15 +11,15 @@
 
         /* Step 2: Define the font-face */
         @font-face {
-            font-family: 'AngryBirdsRegular';
-            src: url('./angrybirds-regular.ttf') format('truetype'); /* Check if .ttf file is in the same folder as index.html */
+            font-family: 'MyGirlIsRetro-0Grz';
+            src: url('./MyGirlIsRetro-0Grz.ttf') format('truetype'); /* Check if .ttf file is in the same folder as index.html */
             font-weight: normal;
             font-style: normal;
         }
 
         /* Step 3: Apply the custom font to desired elements */
         body {
-            font-family: 'AngryBirdsRegular', Arial, sans-serif;
+            font-family: 'MyGirlIsRetro-0Grz', Arial, sans-serif;
         }
     </style>
 </head>
@@ -48,15 +48,13 @@
     element: document.body,
     engine: engine,
     options: {
-        width: 1000,   // Increased canvas width
-        height: 700,   // Increased canvas height
+        width: 1000,
+        height: 700,
         background: '#fafafa',
         showAngleIndicator: true,
         wireframes: false
     }
 });
-
-
     Render.run(render);
 
     // Create runner
@@ -148,61 +146,69 @@
         max: { x: 800, y: 600 }
     });
 
-    // Initialize opacity and size for each prize text
-    let opacity1 = { value: 0, size: 24 };
-    let opacity2 = { value: 0, size: 24 };
-    let opacity3 = { value: 0, size: 24 };
-    let opacity4 = { value: 0, size: 24 };
-    let opacity5 = { value: 0, size: 24 };
-    let opacity6 = { value: 0, size: 24 };
+    Runner.run(runner, engine);
 
-    // GSAP opacity animations with delays
-    gsap.to(opacity2, { value: 1, duration: 1, delay: 2 });
-    gsap.to(opacity4, { value: 1, duration: 1, delay: 2 }); // ₹1,00,000 appears first
-    gsap.to(opacity1, { value: 1, duration: 1, delay: 3 });
-    gsap.to(opacity5, { value: 1, duration: 1, delay: 3 });
-    gsap.to(opacity3, { value: 1, duration: 1, delay: 4 }); // ₹50,000 appears second
-    gsap.to(opacity6, { value: 1, duration: 1, delay: 4 }); 
-    // ₹25,000 appears third
+    // Load images
+    var prizeImages = [
+        { src: './prize2.png', x: 250, y: 300 },
+        { src: './prize1.png', x: 450, y: 300 },
+        { src: './prize3.png', x: 650, y: 300 }
+    ];
+    
+    // Create image objects and load images
+    prizeImages.forEach((prize) => {
+        prize.image = new Image();
+        prize.image.src = prize.src;
+        prize.opacity = { value: 0 };
+        prize.size = { value: 0 };
+    });
 
-    // Increase the font size after opacity animation
-    gsap.to(opacity2, { size: 68, duration: 1, delay: 2});
-    gsap.to(opacity4, { size: 28, duration: 1, delay: 2}); // Increase size of ₹1,00,000
-    gsap.to(opacity1, { size: 48, duration: 1, delay: 3});
-    gsap.to(opacity5, { size: 24, duration: 1, delay: 3}); // Increase size of ₹50,000
-    gsap.to(opacity3, { size: 48, duration: 1, delay:4}); 
-    gsap.to(opacity6, { size: 28, duration: 1, delay:4}); // Increase size of ₹25,000
+    // GSAP animations for each image’s opacity and size
+    gsap.to(prizeImages[0].opacity, { value: 1, duration: 1, delay: 2 });
+    gsap.to(prizeImages[0].size, { value: 1, duration: 1, delay: 2 });
 
-    // Custom rendering function to display text within the canvas
-   // Custom rendering function to display text within the canvas
-Matter.Events.on(render, "afterRender", function() {
+    gsap.to(prizeImages[1].opacity, { value: 1, duration: 1, delay: 3 });
+    gsap.to(prizeImages[1].size, { value: 1, duration: 1, delay: 3 });
+
+    gsap.to(prizeImages[2].opacity, { value: 1, duration: 1, delay: 4 });
+    gsap.to(prizeImages[2].size, { value: 1, duration: 1, delay: 4 });
+
+    // Custom rendering function to display images with animation within the canvas
+    Matter.Events.on(render, "afterRender", function() {
     var ctx = render.context;
 
-    // Adjust font size based on opacity's size property
-    ctx.font = `bold ${opacity1.size}px AngryBirdsRegular`;
+    // Adjust shadow for glowing effect
+    ctx.shadowColor = 'rgba(255, 215, 0, 0.8)'; // Golden glow color
+    ctx.shadowBlur = 15;
 
-    // Draw each text with animated opacity and size
-    ctx.fillStyle = `rgba(51, 51, 51, ${opacity1.value})`;
-    ctx.fillText('₹50,000', 120, 300);
-    ctx.font = `bold ${opacity5.size}px AngryBirdsRegular`;
-    ctx.fillStyle = `rgba(51, 51, 51, ${opacity5.value})`;
-    ctx.fillText('2nd Prize ', 160, 250);
+    // Draw the left and right images first
+    [prizeImages[0], prizeImages[2]].forEach((prize) => {
+        ctx.globalAlpha = prize.opacity.value; // Set image opacity
+        var scale = prize.size.value * 0.5; // Scaling factor for side images
+        ctx.drawImage(
+            prize.image,
+            prize.x - (prize.image.width * scale) / 2,
+            prize.y - (prize.image.height * scale) / 2,
+            prize.image.width * scale,
+            prize.image.height * scale
+        );
+    });
 
-    ctx.font = `bold ${opacity2.size}px AngryBirdsRegular`;
-    ctx.fillStyle = `rgba(51, 51, 51, ${opacity2.value})`;
-    ctx.fillText('₹1,00,000', 300, 400);  // ₹1,00,000 remains here
+    // Draw the middle image last with a slightly larger scale
+    var middlePrize = prizeImages[1];
+    ctx.globalAlpha = middlePrize.opacity.value; // Set opacity for the middle image
+    var middleScale = middlePrize.size.value * 0.55; // Increase scale slightly for floating effect
+    ctx.drawImage(
+        middlePrize.image,
+        middlePrize.x - (middlePrize.image.width * middleScale) / 2,
+        middlePrize.y - (middlePrize.image.height * middleScale) / 2,
+        middlePrize.image.width * middleScale,
+        middlePrize.image.height * middleScale
+    );
 
-    // Position "1st Prize: ₹1,00,000" just above ₹1,00,000
-    ctx.font = `bold ${opacity4.size}px AngryBirdsRegular`;
-    ctx.fillStyle = `rgba(51, 51, 51, ${opacity4.value})`;
-    ctx.fillText('1st Prize ', 410, 340);  // Adjusted y position to 380 for "1st Prize"
-    
-    ctx.font = `bold ${opacity3.size}px AngryBirdsRegular`;
-    ctx.fillStyle = `rgba(51, 51, 51, ${opacity3.value})`;
-    ctx.fillText('₹25,000', 600, 300);
-    ctx.font = `bold ${opacity6.size}px AngryBirdsRegular`;
-    ctx.fillStyle = `rgba(51, 51, 51, ${opacity6.value})`;
-    ctx.fillText('3rd Prize ', 640, 250);
+    // Reset shadow and opacity for other elements
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
 });
 
 </script>
